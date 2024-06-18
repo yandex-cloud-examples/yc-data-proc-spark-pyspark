@@ -107,6 +107,13 @@ resource "yandex_resourcemanager_folder_iam_member" "sa-dataproc-agent" {
   member    = "serviceAccount:${yandex_iam_service_account.data-proc-sa.id}"
 }
 
+# Assign the "dataproc.provisioner" role to the Data Proc service account
+resource "yandex_resourcemanager_folder_iam_member" "sa-dataproc-provisioner" {
+  folder_id = local.folder_id
+  role      = "dataproc.provisioner"
+  member    = "serviceAccount:${yandex_iam_service_account.data-proc-sa.id}"
+}
+
 # Assign the "storage.admin" role to the Data Proc service account
 resource "yandex_resourcemanager_folder_iam_member" "sa-storage-admin" {
   folder_id = local.folder_id
