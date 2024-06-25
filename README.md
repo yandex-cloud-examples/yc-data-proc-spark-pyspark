@@ -6,4 +6,4 @@
 * [Spark-submit](https://spark.apache.org/docs/latest/submitting-applications.html#submitting-applications). Скрипт сохраняет результаты расчета в HDFS.
 * [CLI Yandex Cloud](https://yandex.cloud/ru/docs/cli/). Команды CLI позволяют сохранить результаты расчета не только в HDFS, но и в бакете [Yandex Object Storage](https://yandex.cloud/ru/docs/storage).
 
-Подготовка инфраструктуры для Yandex Data Proc через Terraform описана в [практическом руководстве](https://yandex.cloud/ru/docs/data-proc/tutorials/run-spark-job), необходимый для настройки конфигурационный файл [data-proc-for-spark-jobs.tf](mmy-to-mgp.tf) расположен в этом репозитории.
+Подготовка инфраструктуры для Yandex Data Proc через Terraform описана в [практическом руководстве](https://yandex.cloud/ru/docs/data-proc/tutorials/run-spark-job), необходимый для настройки конфигурационный файл [data-proc-for-spark-jobs.tf](data-proc-for-spark-jobs.tf) расположен в этом репозитории.
