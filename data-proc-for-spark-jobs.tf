@@ -1,4 +1,4 @@
-# Infrastructure for Yandex Data Proc cluster with NAT gateway
+# Infrastructure for Yandex Data Processing cluster with NAT gateway
 #
 # RU: https://cloud.yandex.ru/docs/data-proc/tutorials/configure-network
 # EN: https://cloud.yandex.com/en-ru/docs/data-proc/tutorials/configure-network
@@ -6,7 +6,7 @@
 # Specify the following settings:
 locals {
   folder_id   = "" # Cloud folder ID, the same as for the provider
-  dp_ssh_key  = "" # Absolute path to the SSH public key for the Data Proc cluster. Example: "~/.ssh/key.pub"
+  dp_ssh_key  = "" # Absolute path to the SSH public key for the Yandex Data Processing cluster. Example: "~/.ssh/key.pub"
 
   # The following settings are predefined. Change them only if necessary.
   network_name           = "data-proc_network" # Name of the network
@@ -14,24 +14,24 @@ locals {
   routing_table_name     = "data-proc-routing-table" # Name of the routing table
   subnet_name            = "data-proc-subnet-a" # Name of the subnet
   security_group_name    = "data-proc-security-group" # Name of the security group
-  data_proc_sa_name      = "data-proc-sa" # Name of the service account to manage the Data Proc cluster
+  data_proc_sa_name      = "data-proc-sa" # Name of the service account to manage the Yandex Data Processing cluster
   bucket_name            = "data-proc-bucket" # Set a unique bucket name
-  data_proc_cluster_name = "data-proc-cluster" # Name of the Data Proc cluster
-  data_proc_version      = "2.0" # Version of the Data Proc cluster
+  data_proc_cluster_name = "data-proc-cluster" # Name of the Yandex Data Processing cluster
+  data_proc_version      = "2.0" # Version of the Yandex Data Processing cluster
 }
 
 resource "yandex_vpc_network" "data-proc-network" {
-  description = "Network for the Data Proc cluster"
+  description = "Network for the Yandex Data Processing cluster"
   name        = local.network_name
 }
 
-# NAT gateway for Data Proc
+# NAT gateway for Yandex Data Processing
 resource "yandex_vpc_gateway" "nat-gateway" {
   name = local.nat_name
   shared_egress_gateway {}
 }
 
-# Routing table for Data Proc
+# Routing table for Yandex Data Processing
 resource "yandex_vpc_route_table" "data-proc-routing-table" {
   name       = local.routing_table_name
   network_id = yandex_vpc_network.data-proc-network.id
@@ -43,7 +43,7 @@ resource "yandex_vpc_route_table" "data-proc-routing-table" {
 }
 
 resource "yandex_vpc_subnet" "data-proc-subnet" {
-  description    = "Subnet for the Data Proc cluster"
+  description    = "Subnet for the Yandex Data Processing cluster"
   name           = local.subnet_name
   network_id     = yandex_vpc_network.data-proc-network.id
   v4_cidr_blocks = ["192.168.1.0/24"]
@@ -52,7 +52,7 @@ resource "yandex_vpc_subnet" "data-proc-subnet" {
 }
 
 resource "yandex_vpc_security_group" "data-proc-security-group" {
-  description = "Security group for the Data Proc cluster"
+  description = "Security group for the Yandex Data Processing cluster"
   name        = local.security_group_name
   network_id  = yandex_vpc_network.data-proc-network.id
 
@@ -100,21 +100,21 @@ resource "yandex_iam_service_account" "data-proc-sa" {
   name      = local.data_proc_sa_name
 }
 
-# Assign the "dataproc.agent" role to the Data Proc service account
+# Assign the "dataproc.agent" role to the Yandex Data Processing service account
 resource "yandex_resourcemanager_folder_iam_member" "sa-dataproc-agent" {
   folder_id = local.folder_id
   role      = "dataproc.agent"
   member    = "serviceAccount:${yandex_iam_service_account.data-proc-sa.id}"
 }
 
-# Assign the "dataproc.provisioner" role to the Data Proc service account
+# Assign the "dataproc.provisioner" role to the Yandex Data Processing service account
 resource "yandex_resourcemanager_folder_iam_member" "sa-dataproc-provisioner" {
   folder_id = local.folder_id
   role      = "dataproc.provisioner"
   member    = "serviceAccount:${yandex_iam_service_account.data-proc-sa.id}"
 }
 
-# Assign the "storage.admin" role to the Data Proc service account
+# Assign the "storage.admin" role to the Yandex Data Processing service account
 resource "yandex_resourcemanager_folder_iam_member" "sa-storage-admin" {
   folder_id = local.folder_id
   role      = "storage.admin"
@@ -139,7 +139,7 @@ resource "yandex_storage_bucket" "data-proc-bucket" {
 }
 
 resource "yandex_dataproc_cluster" "data-proc-cluster" {
-  description        = "Yandex Data Proc cluster"
+  description        = "Yandex Data Processing cluster"
   name               = local.data_proc_cluster_name
   service_account_id = yandex_iam_service_account.data-proc-sa.id
   zone_id            = "ru-central1-a"
