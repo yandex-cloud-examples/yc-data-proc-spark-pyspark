@@ -15,6 +15,7 @@ locals {
   subnet_name            = "data-proc-subnet-a" # Name of the subnet
   security_group_name    = "data-proc-security-group" # Name of the security group
   data_proc_sa_name      = "data-proc-sa" # Name of the service account to manage the Yandex Data Processing cluster
+  os_sa_name             = "os-bucket-sa" # Name of the service account to manage the Object Storage bucket
   bucket_name            = "data-proc-bucket" # Set a unique bucket name
   data_proc_cluster_name = "data-proc-cluster" # Name of the Yandex Data Processing cluster
   data_proc_version      = "2.0" # Version of the Yandex Data Processing cluster
@@ -92,6 +93,13 @@ resource "yandex_vpc_security_group" "data-proc-security-group" {
     port           = 80
     v4_cidr_blocks = ["0.0.0.0/0"]
   }
+
+  egress {
+    description    = "Allow access to NTP servers for time syncing"
+    protocol       = "UDP"
+    port           = 123
+    v4_cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 # Create a service account
@@ -114,16 +122,22 @@ resource "yandex_resourcemanager_folder_iam_member" "sa-dataproc-provisioner" {
   member    = "serviceAccount:${yandex_iam_service_account.data-proc-sa.id}"
 }
 
+# Create a service account for managing Object Storage bucket
+resource "yandex_iam_service_account" "sa-for-obj-storage" {
+  folder_id = local.folder_id
+  name      = local.os_sa_name
+}
+
 # Assign the "storage.admin" role to the Yandex Data Processing service account
 resource "yandex_resourcemanager_folder_iam_member" "sa-storage-admin" {
   folder_id = local.folder_id
   role      = "storage.admin"
-  member    = "serviceAccount:${yandex_iam_service_account.data-proc-sa.id}"
+  member    = "serviceAccount:${yandex_iam_service_account.sa-for-obj-storage.id}"
 }
 
 resource "yandex_iam_service_account_static_access_key" "sa-static-key" {
   description        = "Static access key for the Object Storage bucket"
-  service_account_id = yandex_iam_service_account.data-proc-sa.id
+  service_account_id = yandex_iam_service_account.sa-for-obj-storage.id
 }
 
 # Create a bucket
@@ -131,6 +145,9 @@ resource "yandex_storage_bucket" "data-proc-bucket" {
   access_key = yandex_iam_service_account_static_access_key.sa-static-key.access_key
   secret_key = yandex_iam_service_account_static_access_key.sa-static-key.secret_key
   bucket     = local.bucket_name
+  depends_on = [
+    yandex_resourcemanager_folder_iam_member.sa-storage-admin
+  ]
   grant {
     id          = yandex_iam_service_account.data-proc-sa.id
     type        = "CanonicalUser"
@@ -140,6 +157,7 @@ resource "yandex_storage_bucket" "data-proc-bucket" {
 
 resource "yandex_dataproc_cluster" "data-proc-cluster" {
   description        = "Yandex Data Processing cluster"
+  depends_on         = [yandex_resourcemanager_folder_iam_member.sa-dataproc-agent,yandex_resourcemanager_folder_iam_member.sa-dataproc-provisioner]
   name               = local.data_proc_cluster_name
   service_account_id = yandex_iam_service_account.data-proc-sa.id
   zone_id            = "ru-central1-a"
@@ -155,7 +173,7 @@ resource "yandex_dataproc_cluster" "data-proc-cluster" {
     hadoop {
       services = ["HDFS", "YARN", "SPARK", "MAPREDUCE", "HIVE"]
       ssh_public_keys = [
-        file(local.dp_ssh_key)
+        "${file(local.dp_ssh_key)}"
       ]
     }
 
