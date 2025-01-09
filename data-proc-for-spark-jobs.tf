@@ -15,7 +15,7 @@ locals {
   subnet_name            = "data-proc-subnet-a" # Name of the subnet
   security_group_name    = "data-proc-security-group" # Name of the security group
   data_proc_sa_name      = "data-proc-sa" # Name of the service account to manage the Yandex Data Processing cluster
-  os_sa_name             = "os-bucket-sa" # Name of the service account to manage the Object Storage bucket
+  os_sa_name             = "os-bucket-sa" # Name of the service account to manage the Object Storage bucket and bucket's ACLs
   bucket_name            = "data-proc-bucket" # Set a unique bucket name
   data_proc_cluster_name = "data-proc-cluster" # Name of the Yandex Data Processing cluster
   data_proc_version      = "2.0" # Version of the Yandex Data Processing cluster
