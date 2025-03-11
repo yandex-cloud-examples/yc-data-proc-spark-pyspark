@@ -157,6 +157,7 @@ resource "yandex_storage_bucket" "data-proc-bucket" {
 
 resource "yandex_dataproc_cluster" "data-proc-cluster" {
   description        = "Yandex Data Processing cluster"
+  environment        = "PRODUCTION"
   depends_on         = [yandex_resourcemanager_folder_iam_member.sa-dataproc-agent,yandex_resourcemanager_folder_iam_member.sa-dataproc-provisioner]
   name               = local.data_proc_cluster_name
   service_account_id = yandex_iam_service_account.data-proc-sa.id
