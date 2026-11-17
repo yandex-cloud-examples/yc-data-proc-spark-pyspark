@@ -18,7 +18,7 @@ locals {
   os_sa_name             = "os-bucket-sa" # Name of the service account to manage the Object Storage bucket and bucket's ACLs
   bucket_name            = "data-proc-bucket" # Set a unique bucket name
   data_proc_cluster_name = "data-proc-cluster" # Name of the Yandex Data Processing cluster
-  data_proc_version      = "2.0" # Version of the Yandex Data Processing cluster
+  data_proc_version      = "2.1" # Version of the Yandex Data Processing cluster
 }
 
 resource "yandex_vpc_network" "data-proc-network" {
@@ -179,7 +179,7 @@ resource "yandex_dataproc_cluster" "data-proc-cluster" {
     version_id = local.data_proc_version
 
     hadoop {
-      services = ["HDFS", "YARN", "SPARK", "MAPREDUCE", "HIVE"]
+      services = ["HDFS", "YARN", "SPARK", "MAPREDUCE"]
       ssh_public_keys = [
         file(local.dp_ssh_key)
       ]
